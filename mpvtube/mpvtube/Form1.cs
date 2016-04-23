@@ -29,6 +29,12 @@ namespace mpvtube
 		public const string QualLow = "\"best[height=360]\"";
 		public const string QualAudio = "bestaudio";
 
+		public const string MPVLow = "vo=opengl:deband hwdec=auto";
+		public const string MPVMedium = "vo=opengl-hq hwdec=auto";
+		public const string MPVHigh = "vo=opengl-hq:scale=ewa_lanczossharp:cscale=ewa_lanczossoft hwdec=auto";
+		public const string MPVHighest = "vo=opengl-hq:scale=ewa_lanczossharp:cscale=ewa_lanczossoft:prescale-luma=superxbr:prescale-downscaling-threshold=1.5";
+		public const string MPVInsane = "vo=opengl-hq:scale=ewa_lanczossharp:cscale=ewa_lanczossoft:prescale-luma=nnedi3:prescale-downscaling-threshold=1.5";
+
 		public Form1 ()
 		{
 			InitializeComponent();
@@ -37,6 +43,7 @@ namespace mpvtube
 		private void Form1_Load (object sender, EventArgs e)
 		{
 			highQuality.Checked = true;
+			mpvHigh.Checked = true;
 		}
 
 		private async void searchBtn_Click (object sender, EventArgs e)
@@ -77,15 +84,15 @@ namespace mpvtube
 			}
 		}
 
-		private void playVideo(string url, string quality)
+		private void playVideo(string url, string ytquality, string mpvquality)
 		{
 			if (alwaysOnTopToolStripMenuItem.Checked)
-				quality = quality + " --ontop";
+				ytquality = ytquality + " --ontop";
 			System.Diagnostics.Process process = new System.Diagnostics.Process();
 			System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
 			startInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
 			startInfo.FileName = "cmd.exe";
-			startInfo.Arguments = "/K mpv https://www.youtube.com/watch?v=" + url + " --ytdl-format=" + quality;
+			startInfo.Arguments = "/K mpv https://www.youtube.com/watch?v=" + url + " --ytdl-format=" + ytquality + " " + mpvquality;
 			Console.Write(startInfo.Arguments);
 			process.StartInfo = startInfo;
 			process.Start();
@@ -100,12 +107,27 @@ namespace mpvtube
 
 		private void resultsList_DoubleClick (object sender, EventArgs e)
 		{
+			string ytQual = "";
+			string mpvQual = "";
 			if (highQuality.Checked)
-				playVideo(urls[resultsList.FocusedItem.Index], QualBest);
+				ytQual = QualBest;
 			else if (lowQuality.Checked)
-				playVideo(urls[resultsList.FocusedItem.Index], QualLow);
+				ytQual = QualLow;
 			else if (audioQuality.Checked)
-				playVideo(urls[resultsList.FocusedItem.Index], QualAudio);
+				ytQual = QualAudio;
+
+			if (mpvLow.Checked)
+				mpvQual = MPVLow;
+			else if (mpvMedium.Checked)
+				mpvQual = MPVMedium;
+			else if (mpvHigh.Checked)
+				mpvQual = MPVHigh;
+			else if (mpvHighest.Checked)
+				mpvQual = MPVHighest;
+			else if (mpvInsane.Checked)
+				mpvQual = MPVInsane;
+
+			playVideo(urls[resultsList.FocusedItem.Index], ytQual, mpvQual);
 		}
 
 		private void resultsList_SelectedIndexChanged (object sender, EventArgs e)
